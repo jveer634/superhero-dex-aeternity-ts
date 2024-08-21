@@ -81,14 +81,19 @@ const swapAEToToken = async () => {
         sourceCode: RouterABI,
     });
 
+    const amount = 1;
+
     const path = [WAE, tokenAddress];
-    const minOut = 0;
+    const { decodedResult: minOuts } = await router.$call("get_amounts_out", [
+        amount,
+        path,
+    ]);
 
     const tx = await router.$call(
         "swap_exact_ae_for_tokens",
-        [minOut, path, receiver, deadline],
+        [minOuts[1], path, receiver, deadline],
         // @ts-ignore
-        { denomination: AE_AMOUNT_FORMATS.FEMTO_AE, amount: 1, confirm: 1 }
+        { denomination: AE_AMOUNT_FORMATS.FEMTO_AE, amount, confirm: 1 }
     );
 
     console.log("Swap completed: ", tx.hash);
@@ -174,15 +179,15 @@ const tokenToToken = async () => {
     await approveToken(tokenA, router, amount);
 
     const path = [tokenA.$options.address, tokenB.$options.address];
-    const { decodedResult: minOut } = await router.$call("get_amounts_out", [
+    const { decodedResult: minOuts } = await router.$call("get_amounts_out", [
         amount,
         path,
     ]);
-    console.log("Min Amount out: ", minOut);
+    console.log("Min Amount out: ", minOuts);
 
     const tx = await router.$call(
         "swap_exact_tokens_for_tokens",
-        [amount, minOut[1], path, account.address, deadline],
+        [amount, minOuts[1], path, account.address, deadline],
         { confirm: 1 }
     );
 
